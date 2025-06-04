@@ -6,19 +6,27 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
-      fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-      },
       colors: {
+        brand: {
+          electric: "#7DF9FF",   // primary
+          white:   "#FFFFFF",
+          gray:    "#4D4D4F",
+          black:   "#000000",
+        },
         background: "var(--background)",
         foreground: "var(--foreground)",
+      },
+      fontFamily: {
+        sans: ["Meutas", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },
   plugins: [
-    require("tailwind-scrollbar"),
+    require("@tailwindcss/typography"), 
+    require("tailwind-scrollbar")
   ],
 };
 

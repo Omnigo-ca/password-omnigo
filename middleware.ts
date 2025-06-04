@@ -4,6 +4,7 @@ const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/passwords(.*)',
   '/profile(.*)',
+  '/api/password(.*)', // Protect all password API routes
 ])
 
 export default clerkMiddleware(async (auth, req) => {

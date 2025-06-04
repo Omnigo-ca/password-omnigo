@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
 
 export const metadata: Metadata = {
   title: "Omnigo Password Manager",
@@ -24,14 +19,14 @@ export default function RootLayout({
   if (!publishableKey || publishableKey.includes('placeholder')) {
     return (
       <html lang="en">
-        <body className={`${inter.variable} font-sans antialiased`}>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <body className="font-sans antialiased">
+          <div className="min-h-screen bg-gradient-to-br from-brand-white to-brand-electric/10 dark:from-brand-black dark:to-brand-gray/20">
             <div className="flex items-center justify-center min-h-screen">
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <h1 className="text-2xl font-bold text-brand-black dark:text-brand-white mb-4">
                   Omnigo Password Manager
                 </h1>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-brand-gray dark:text-brand-white/70">
                   Please configure your Clerk authentication keys to continue.
                 </p>
               </div>
@@ -45,8 +40,20 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${inter.variable} font-sans antialiased`}>
+        <body className="font-sans antialiased">
           {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#7DF9FF',
+                color: '#000000',
+                fontFamily: 'Meutas, sans-serif',
+                fontWeight: '500',
+              },
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

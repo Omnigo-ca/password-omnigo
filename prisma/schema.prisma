@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model UserKey {
@@ -23,21 +24,45 @@ model UserKey {
 
   // Relation to passwords
   passwords       Password[]
+  // Relation to clients
+  clients         Client[]
 
   @@map("user_keys")
 }
 
-model Password {
+model Client {
   id         String   @id @default(cuid())
   name       String
-  ciphertext String   // Password encrypted with user's key
-  iv         String   // IV used for password encryption
+  website    String?  // Optional website URL
+  color      String   @default("#7DF9FF") // Pellet color (hex)
   userId     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   // Relation to user key
   userKey    UserKey  @relation(fields: [userId], references: [userId])
+  // Relation to passwords
+  passwords  Password[]
+
+  @@map("clients")
+}
+
+model Password {
+  id         String   @id @default(cuid())
+  name       String
+  username   String?  // Plain text username (not encrypted)
+  url        String?  // Connection URL for the service
+  ciphertext String   // Password encrypted with user's key
+  iv         String   // IV used for password encryption
+  userId     String
+  clientId   String?  // Optional client association
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relation to user key
+  userKey    UserKey  @relation(fields: [userId], references: [userId])
+  // Relation to client
+  client     Client?  @relation(fields: [clientId], references: [id])
 
   @@map("passwords")
 }
