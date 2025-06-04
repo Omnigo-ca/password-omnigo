@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserKey {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  encryptedKey    String   // User's encryption key encrypted with MASTER_KEY
+  iv              String   // IV used for encrypting the user key
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relation to passwords
+  passwords       Password[]
+
+  @@map("user_keys")
+}
+
+model Password {
+  id         String   @id @default(cuid())
+  name       String
+  ciphertext String   // Password encrypted with user's key
+  iv         String   // IV used for password encryption
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relation to user key
+  userKey    UserKey  @relation(fields: [userId], references: [userId])
+
+  @@map("passwords")
+}
