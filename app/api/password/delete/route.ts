@@ -32,11 +32,10 @@ export async function POST(request: NextRequest) {
 
     const { id } = validation.data
 
-    // Verify password exists and user owns it
+    // Verify password exists (any user can delete any password)
     const password = await prisma.password.findFirst({
       where: {
         id,
-        userId, // Ensure user owns this password
       },
       select: {
         id: true,
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     if (!password) {
       return NextResponse.json(
-        { error: 'Password not found or access denied' },
+        { error: 'Password not found' },
         { status: 404 }
       )
     }

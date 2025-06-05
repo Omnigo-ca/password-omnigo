@@ -164,7 +164,7 @@ export function PasswordCard({ password, allPasswords, onPasswordDeleted, onPass
               <div className="flex flex-wrap gap-2">
                 {password.service && (
                   <span 
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
                     style={{
                       backgroundColor: password.service.color || '#4ECDC4',
                       color: getTextColor(password.service.color || '#4ECDC4')
