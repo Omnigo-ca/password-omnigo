@@ -40,11 +40,10 @@ export async function PUT(request: NextRequest) {
 
     const { id, name, username, url, plaintext, clientId, serviceId } = validationResult.data
 
-    // Check if password exists and belongs to user
+    // Check if password exists (any user can update any password)
     const existingPassword = await prisma.password.findFirst({
       where: {
         id: id,
-        userId: userId,
       },
     })
 
@@ -55,12 +54,11 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Check if client exists and belongs to user (if clientId is provided)
+    // Check if client exists (if clientId is provided)
     if (clientId) {
       const client = await prisma.client.findFirst({
         where: {
           id: clientId,
-          userId: userId,
         },
       })
 
@@ -72,12 +70,11 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Check if service exists and belongs to user (if serviceId is provided)
+    // Check if service exists (if serviceId is provided)
     if (serviceId) {
       const service = await prisma.service.findFirst({
         where: {
           id: serviceId,
-          userId: userId,
         },
       })
 
@@ -93,7 +90,6 @@ export async function PUT(request: NextRequest) {
     const duplicatePassword = await prisma.password.findFirst({
       where: {
         name: name,
-        userId: userId,
         id: {
           not: id
         }

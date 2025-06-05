@@ -18,11 +18,10 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json()
     const validatedData = deleteServiceSchema.parse(body)
 
-    // Check if the service exists and belongs to the user
+    // Check if the service exists (any user can delete any service)
     const existingService = await prisma.service.findFirst({
       where: {
         id: validatedData.id,
-        userId: userId
       },
       include: {
         _count: {

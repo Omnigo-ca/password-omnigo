@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -41,7 +43,13 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className="font-sans antialiased">
-          {children}
+          <div className="min-h-screen flex flex-col bg-gradient-to-br from-brand-white to-brand-electric/10 dark:from-brand-black dark:to-brand-gray/20">
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </div>
           <Toaster
             position="top-right"
             toastOptions={{

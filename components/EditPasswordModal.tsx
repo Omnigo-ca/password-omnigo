@@ -39,6 +39,7 @@ interface EditPasswordModalProps {
 }
 
 const editPasswordSchema = z.object({
+  name: z.string().min(1, 'Le nom est requis').max(100, 'Le nom ne peut pas dépasser 100 caractères'),
   clientId: z.string().optional(),
   serviceId: z.string().optional(),
   customServiceName: z.string().optional(),
@@ -66,6 +67,7 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
   } = useForm<EditPasswordForm>({
     resolver: zodResolver(editPasswordSchema),
     defaultValues: {
+      name: password.name || '',
       clientId: password.client?.id || '',
       serviceId: password.service?.id || '',
       username: password.username || '',
@@ -163,10 +165,6 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
         }
       }
 
-      // Generate password name if service or client changed
-      const clientName = clients.find(c => c.id === data.clientId)?.name || ''
-      const generatedName = serviceName && clientName ? `${serviceName} - ${clientName}` : password.name
-
       const response = await fetch('/api/password/update', {
         method: 'PUT',
         headers: {
@@ -174,7 +172,7 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
         },
         body: JSON.stringify({
           id: password.id,
-          name: generatedName,
+          name: data.name,
           username: data.username,
           url: data.url,
           plaintext: data.plaintext || undefined,
@@ -230,6 +228,7 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
     if (!isSubmitting) {
       onClose()
       reset({
+        name: password.name || '',
         clientId: password.client?.id || '',
         serviceId: password.service?.id || '',
         username: password.username || '',
@@ -290,6 +289,24 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
               </div>
 
               <div className="space-y-4">
+                {/* Name field */}
+                <div>
+                  <label htmlFor="edit-password-name" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    Nom du mot de passe *
+                  </label>
+                  <input
+                    {...register('name')}
+                    type="text"
+                    id="edit-password-name"
+                    disabled={isSubmitting}
+                    placeholder="Ex: Google - Personnel"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+                  )}
+                </div>
+
                 {/* Client selection */}
                 <div>
                   <label htmlFor="edit-password-client" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">

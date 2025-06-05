@@ -6,7 +6,7 @@ import { PasswordCard } from '@/components/PasswordCard'
 import { ClientCard } from '@/components/ClientCard'
 import { AddPasswordModal } from '@/components/AddPasswordModal'
 import { AddClientModal } from '@/components/AddClientModal'
-import { DarkModeToggle } from '@/components/DarkModeToggle'
+
 import { ServiceSettingsModal } from '@/components/ServiceSettingsModal'
 
 interface Client {
@@ -210,7 +210,7 @@ export default function DashboardPage() {
 
   if (!isLoaded || loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-brand-black flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-electric"></div>
       </div>
     )
@@ -218,14 +218,14 @@ export default function DashboardPage() {
 
   if (!userId) {
     return (
-      <div className="min-h-screen bg-white dark:bg-brand-black flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[50vh]">
         <p className="text-brand-gray dark:text-brand-white">Veuillez vous connecter</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-brand-black">
+    <div className="bg-white dark:bg-brand-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -243,7 +243,7 @@ export default function DashboardPage() {
             ) : (
               <AddClientModal onClientAdded={handleClientAdded} />
             )}
-            <DarkModeToggle />
+
           </div>
         </div>
 
