@@ -36,7 +36,7 @@ export function DarkModeToggle() {
   return (
     <button
       onClick={toggleDarkMode}
-      className="p-2 rounded-lg text-brand-gray hover:text-brand-black dark:text-brand-white/70 dark:hover:text-brand-white hover:bg-brand-gray/10 dark:hover:bg-brand-white/10 transition-colors duration-200"
+      className="p-2 rounded-lg text-brand-gray hover:text-brand-black dark:text-brand-white/70 dark:hover:text-brand-white hover:bg-brand-gray/10 dark:hover:bg-brand-white/10 transition-colors duration-200 cursor-pointer"
       title={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
     >
       {isDark ? (

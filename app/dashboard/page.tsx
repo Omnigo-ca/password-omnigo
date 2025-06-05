@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { PasswordCard } from '@/components/PasswordCard'
+import { ClientCard } from '@/components/ClientCard'
 import { AddPasswordModal } from '@/components/AddPasswordModal'
 import { AddClientModal } from '@/components/AddClientModal'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
@@ -100,6 +101,18 @@ export default function DashboardPage() {
     fetchPasswords()
   }
 
+  const handlePasswordUpdated = () => {
+    fetchPasswords()
+  }
+
+  const handleClientDeleted = () => {
+    fetchClients()
+  }
+
+  const handleClientUpdated = () => {
+    fetchClients()
+  }
+
   if (!isLoaded || loading) {
     return (
       <div className="min-h-screen bg-white dark:bg-brand-black flex items-center justify-center">
@@ -144,7 +157,7 @@ export default function DashboardPage() {
           <nav className="flex space-x-2 bg-gray-100 dark:bg-brand-gray/10 border border-brand-gray/20 p-1 rounded-lg w-fit">
             <button
               onClick={() => setActiveTab('passwords')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer ${
                 activeTab === 'passwords'
                   ? 'bg-white dark:bg-brand-gray/10 text-brand-electric shadow-sm'
                   : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
@@ -154,7 +167,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => setActiveTab('clients')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer ${
                 activeTab === 'clients'
                   ? 'bg-white dark:bg-brand-gray/10 text-brand-electric shadow-sm'
                   : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
@@ -206,6 +219,7 @@ export default function DashboardPage() {
                     key={password.id} 
                     password={password} 
                     onPasswordDeleted={handlePasswordDeleted}
+                    onPasswordUpdated={handlePasswordUpdated}
                   />
                 ))}
               </div>
@@ -240,37 +254,12 @@ export default function DashboardPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {clients.map((client) => (
-                  <div
-                    key={client.id}
-                    className="bg-white dark:bg-brand-gray/10 border border-brand-gray/20 dark:border-brand-white/20 rounded-xl p-6 hover:shadow-lg dark:hover:shadow-brand-electric/10 transition-all duration-200"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-brand-black dark:text-brand-white mb-1">
-                          {client.name}
-                        </h3>
-                        {client.website && (
-                          <a
-                            href={client.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-brand-electric hover:underline break-all py-1 px-2 rounded-lg"
-                          >
-                            {client.website}
-                          </a>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm text-brand-gray dark:text-brand-white/70">
-                      <span>
-                        {client._count.passwords} mot{client._count.passwords !== 1 ? 's' : ''} de passe
-                      </span>
-                      <span>
-                        {new Date(client.createdAt).toLocaleDateString('fr-FR')}
-                      </span>
-                    </div>
-                  </div>
+                  <ClientCard 
+                    key={client.id} 
+                    client={client} 
+                    onClientDeleted={handleClientDeleted}
+                    onClientUpdated={handleClientUpdated}
+                  />
                 ))}
               </div>
             )}

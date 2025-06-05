@@ -182,7 +182,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center px-4 py-2 bg-brand-electric text-brand-black font-medium text-sm rounded-lg hover:bg-brand-electric/80 focus:ring-2 focus:ring-brand-electric focus:ring-offset-2 dark:focus:ring-offset-brand-black transition-all duration-200"
+        className="inline-flex items-center px-4 py-2 bg-brand-electric text-brand-black font-medium text-sm rounded-lg hover:bg-brand-electric/80 focus:ring-2 focus:ring-brand-electric focus:ring-offset-2 dark:focus:ring-offset-brand-black transition-all duration-200 cursor-pointer"
       >
         <svg
           className="w-4 h-4 mr-2"
@@ -223,7 +223,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                       type="button"
                       onClick={handleClose}
                       disabled={isSubmitting}
-                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors duration-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors duration-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                       aria-label="Fermer"
                     >
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,7 +294,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                               setSelectedColor(color)
                               setUseCustomColor(false)
                             }}
-                            className={`w-8 h-8 rounded-full border-2 transition-all duration-200 ${
+                            className={`w-8 h-8 rounded-full border-2 transition-all duration-200 cursor-pointer ${
                               selectedColor === color && !useCustomColor
                                 ? 'border-gray-900 dark:border-white scale-110'
                                 : 'border-gray-300 dark:border-gray-600 hover:scale-105'
@@ -340,14 +340,14 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                     type="button"
                     onClick={handleClose}
                     disabled={isSubmitting}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="inline-flex items-center px-4 py-2 bg-brand-electric text-brand-black font-medium text-sm rounded-lg hover:bg-brand-electric/80 focus:ring-2 focus:ring-brand-electric focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-4 py-2 bg-brand-electric text-brand-black font-medium text-sm rounded-lg hover:bg-brand-electric/80 focus:ring-2 focus:ring-brand-electric focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {isSubmitting ? (
                       <>

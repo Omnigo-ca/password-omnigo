@@ -1,37 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import { CopyButton } from './CopyButton'
-import { CopyUsernameButton } from './CopyUsernameButton'
-import { EditPasswordModal } from './EditPasswordModal'
 import toast from 'react-hot-toast'
+import { EditClientModal } from './EditClientModal'
 import { FaExternalLinkAlt } from 'react-icons/fa'
-import { FaEarthAmericas } from 'react-icons/fa6'
 
 interface Client {
   id: string
   name: string
   website?: string
   color: string
-}
-
-interface Password {
-  id: string
-  name: string
-  username?: string
-  url?: string
   createdAt: string
   updatedAt: string
-  client?: Client
+  _count: {
+    passwords: number
+  }
 }
 
-interface PasswordCardProps {
-  password: Password
-  onPasswordDeleted?: () => void
-  onPasswordUpdated?: () => void
+interface ClientCardProps {
+  client: Client
+  onClientDeleted?: () => void
+  onClientUpdated?: () => void
 }
 
-export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }: PasswordCardProps) {
+export function ClientCard({ client, onClientDeleted, onClientUpdated }: ClientCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -40,12 +32,12 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
     setIsDeleting(true)
     
     try {
-      const response = await fetch(`/api/password/delete`, {
+      const response = await fetch(`/api/client/delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ id: password.id }),
+        body: JSON.stringify({ id: client.id }),
       })
 
       if (!response.ok) {
@@ -61,7 +53,7 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
         return
       }
 
-      toast.success('Mot de passe supprimé avec succès!', {
+      toast.success('Client supprimé avec succès!', {
         style: {
           background: '#7DF9FF',
           color: '#000000',
@@ -70,12 +62,12 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
         },
       })
 
-      if (onPasswordDeleted) {
-        onPasswordDeleted()
+      if (onClientDeleted) {
+        onClientDeleted()
       }
 
     } catch (error) {
-      console.error('Error deleting password:', error)
+      console.error('Error deleting client:', error)
       toast.error('Erreur lors de la suppression', {
         style: {
           background: '#ef4444',
@@ -87,13 +79,6 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
     } finally {
       setIsDeleting(false)
       setShowDeleteConfirm(false)
-    }
-  }
-
-  const handlePasswordUpdated = () => {
-    // Refresh the password list when a password is updated
-    if (onPasswordUpdated) {
-      onPasswordUpdated()
     }
   }
 
@@ -117,85 +102,81 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
   return (
     <>
       <div className="bg-white dark:bg-brand-gray/10 border border-brand-gray/20 dark:border-brand-white/20 rounded-xl p-6 hover:shadow-lg dark:hover:shadow-brand-electric/10 transition-all duration-200">
-        {/* Header with name and client */}
+        {/* Header with name and color */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
               <h3 className="text-lg font-semibold text-brand-black dark:text-brand-white">
-                {password.name}
+                {client.name}
               </h3>
-              {password.client && (
-                <span 
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  style={{ 
-                    backgroundColor: password.client.color,
-                    color: getTextColor(password.client.color)
-                  }}
-                >
-                  {password.client.name}
-                </span>
-              )}
+              <span 
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                style={{ 
+                  backgroundColor: client.color,
+                  color: getTextColor(client.color)
+                }}
+              >
+                {client.color}
+              </span>
             </div>
             <div className="text-sm text-brand-gray dark:text-brand-white/50">
-            Modifié le {new Date(password.updatedAt).toLocaleDateString('fr-FR', {
+            Modifié le {new Date(client.updatedAt).toLocaleDateString('fr-FR', {
               day: 'numeric',
               month: 'long',
               year: 'numeric',
             })}
-            </div>
-            
-            
           </div>
+          </div>
+          
         </div>
+        
 
         {/* Actions */}
         <div className="flex items-left justify-between flex-col gap-4">
-          
-          
-          
-          <div className="flex items-center space-x-4 w-full">
-            {password.username && (
-              <CopyUsernameButton 
-                passwordId={password.id} 
-                hasUsername={!!password.username}
-              />
-            )}
-            
-            <CopyButton passwordId={password.id} />
-          </div>
-          {/* URL */}
-          {password.url && (
+          {/* Website Button */}
+          {client.website && (
             <button
-              onClick={() => window.open(password.url, '_blank')}
+              onClick={() => window.open(client.website, '_blank')}
               className="w-full bg-brand-electric hover:bg-brand-electric/80 text-brand-black font-medium text-sm rounded-lg py-2.5 px-4 flex items-center justify-center transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-brand-electric focus:ring-offset-2 dark:focus:ring-offset-brand-gray cursor-pointer"
-              title="Ouvrir l'URL de connexion"
+              title="Ouvrir le site web"
             >
               <FaExternalLinkAlt className="w-4 h-4 mr-2" />
-              <span>Ouvrir l'URL de connexion</span>
+              <span>Visiter le site web</span>
             </button>
           )}
-          <div className="flex items-center justify-left gap-4 ">
+          
+          <div className="flex items-center justify-between text-sm text-brand-gray dark:text-brand-white/70">
+            <span>
+              {client._count.passwords} mot{client._count.passwords !== 1 ? 's' : ''} de passe
+            </span>
+            <span>
+              {new Date(client.createdAt).toLocaleDateString('fr-FR')}
+            </span>
+          </div>
+          
+          <div className="flex items-center justify-left gap-4">
             <button 
-                onClick={() => setShowEditModal(true)}
-                className="p-2 text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white hover:bg-brand-gray/10 dark:hover:bg-brand-white/10 rounded-lg transition-colors duration-200 cursor-pointer"
-                title="Modifier"
-                >
-            <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              onClick={() => setShowEditModal(true)}
+              className="p-2 text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white hover:bg-brand-gray/10 dark:hover:bg-brand-white/10 rounded-lg transition-colors duration-200 cursor-pointer"
+              title="Modifier"
+            >
+              <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+              </svg>
             </button>
             
             <button 
-            onClick={() => setShowDeleteConfirm(true)}
-            disabled={isDeleting}
-            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            title="Supprimer"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={isDeleting || client._count.passwords > 0}
+              className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              title={client._count.passwords > 0 ? "Impossible de supprimer un client avec des mots de passe" : "Supprimer"}
             >
-            <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
+              </svg>
             </button>
           </div>
+          
           
         </div>
       </div>
@@ -212,22 +193,31 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
             />
 
             {/* Modal panel */}
-            <div className="relative inline-block align-middle bg-white dark:bg-brand-gray/10 border border-brand-gray/20 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-600">
+            <div className="relative inline-block align-middle bg-white dark:bg-brand-gray/10 border border-brand-gray/20 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-600 backdrop-blur-sm">
               <div className="px-6 pt-6 pb-4">
                 <div className="flex items-center mb-4">
                   <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20">
-                    <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    <svg
+                      className="h-6 w-6 text-red-600 dark:text-red-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                      />
                     </svg>
                   </div>
                 </div>
-                
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Supprimer le mot de passe
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2" id="modal-title">
+                    Supprimer le client
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Êtes-vous sûr de vouloir supprimer le mot de passe pour <strong>{password.name}</strong> ? Cette action est irréversible.
+                    Êtes-vous sûr de vouloir supprimer le client "{client.name}" ? Cette action est irréversible.
                   </p>
                 </div>
               </div>
@@ -280,12 +270,12 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
         </div>
       )}
 
-      {/* Edit Password Modal */}
-      <EditPasswordModal
-        password={password}
+      {/* Edit Client Modal */}
+      <EditClientModal
+        client={client}
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
-        onPasswordUpdated={handlePasswordUpdated}
+        onClientUpdated={onClientUpdated}
       />
     </>
   )
