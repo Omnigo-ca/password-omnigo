@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { toast } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 interface Service {
   id: string
@@ -81,7 +81,7 @@ export function ServiceSettingsModal({ onServicesUpdated }: ServiceSettingsModal
     return luminance < 0.5 ? '#ffffff' : '#000000'
   }
 
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     if (!userId) return
     
     try {
@@ -107,13 +107,13 @@ export function ServiceSettingsModal({ onServicesUpdated }: ServiceSettingsModal
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId])
 
   useEffect(() => {
     if (isOpen && userId) {
       fetchServices()
     }
-  }, [isOpen, userId])
+  }, [isOpen, userId, fetchServices])
 
   // Handle modal focus and body scroll
   useEffect(() => {
@@ -248,7 +248,7 @@ export function ServiceSettingsModal({ onServicesUpdated }: ServiceSettingsModal
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen, isSubmitting])
+  }, [isOpen, isSubmitting, handleClose])
 
   return (
     <>

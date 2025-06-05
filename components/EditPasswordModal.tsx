@@ -133,7 +133,6 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
     
     try {
       let finalServiceId = data.serviceId
-      let serviceName = selectedService?.name || ''
 
       // If custom service is selected, create it first
       if (data.serviceId === 'custom' && data.customServiceName) {
@@ -150,7 +149,6 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
         if (serviceResponse.ok) {
           const serviceData = await serviceResponse.json()
           finalServiceId = serviceData.service.id
-          serviceName = data.customServiceName
         } else {
           const serviceError = await serviceResponse.json()
           toast.error(serviceError.error || 'Erreur lors de la création du service', {
@@ -253,7 +251,7 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen, isSubmitting])
+  }, [isOpen, isSubmitting, handleClose])
 
   if (!isOpen) return null
 

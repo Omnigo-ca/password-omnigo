@@ -198,7 +198,7 @@ export function EditClientModal({ client, isOpen, onClose, onClientUpdated }: Ed
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen, isSubmitting])
+  }, [isOpen, isSubmitting, handleClose])
 
   if (!isOpen) return null
 

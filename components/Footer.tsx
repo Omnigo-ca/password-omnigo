@@ -21,7 +21,7 @@ export function Footer() {
               href="#" 
               className="text-xs text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white transition-colors duration-200"
             >
-              Conditions d'utilisation
+              Conditions d&apos;utilisation
             </a>
           </div>
         </div>
