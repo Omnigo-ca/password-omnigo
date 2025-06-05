@@ -113,10 +113,36 @@ Si vous obtenez cette erreur :
 Error validating datasource `db`: the URL must start with the protocol `prisma://`
 ```
 
-**Solution :**
-1. Vérifiez que `DATABASE_URL` utilise le format PostgreSQL standard
-2. N'utilisez PAS Prisma Accelerate URLs sur Vercel avec Neon
-3. Utilisez directement l'URL Neon native
+**Solutions par ordre de priorité :**
+
+1. **Vérifiez vos variables d'environnement Vercel :**
+   - Assurez-vous que `DATABASE_URL` utilise le format PostgreSQL standard
+   - Format correct : `postgresql://username:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`
+   - ❌ N'utilisez PAS : `prisma://` URLs
+
+2. **Supprimez les variables Prisma Accelerate si présentes :**
+   Dans Vercel, supprimez ces variables si elles existent :
+   - `POSTGRES_PRISMA_URL`
+   - `POSTGRES_URL_NON_POOLING` 
+   - `POSTGRES_URL`
+   
+   Gardez seulement `DATABASE_URL` avec l'URL Neon directe.
+
+3. **Redéployez complètement :**
+   ```bash
+   # Supprimez le cache de build Vercel
+   vercel --prod --force
+   ```
+
+4. **Vérifiez la configuration Prisma :**
+   - Le fichier `lib/prisma.ts` ne doit PAS avoir de `datasources` override
+   - Utilisez seulement la configuration de base
+
+5. **Build script correct :**
+   ```json
+   "build": "npx prisma generate && next build"
+   ```
+   (Sans `--no-engine` qui peut causer des problèmes)
 
 ### Timeouts de connexion
 
