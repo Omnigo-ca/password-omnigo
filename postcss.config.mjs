@@ -1,5 +1,8 @@
-const config = {
-  plugins: ["@tailwindcss/postcss"],
-};
+import tailwindcss from 'tailwindcss'
+import postcssNesting from 'postcss-nesting'
 
-export default config;
+const config = {
+  plugins: [tailwindcss, postcssNesting],
+}
+
+export default config

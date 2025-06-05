@@ -13,11 +13,8 @@ export async function GET() {
       )
     }
 
-    // Fetch all clients for the user
+    // Fetch all clients
     const clients = await prisma.client.findMany({
-      where: {
-        userId,
-      },
       select: {
         id: true,
         name: true,

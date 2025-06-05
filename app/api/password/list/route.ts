@@ -13,11 +13,8 @@ export async function GET() {
       )
     }
 
-    // Fetch all passwords for the user with client information
+    // Fetch all passwords with client information
     const passwords = await prisma.password.findMany({
-      where: {
-        userId,
-      },
       select: {
         id: true,
         name: true,

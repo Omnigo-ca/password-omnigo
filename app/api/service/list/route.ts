@@ -10,11 +10,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    // Get services for the user
+    // Get all services
     const services = await prisma.service.findMany({
-      where: {
-        userId: userId
-      },
       orderBy: [
         { isCustom: 'asc' }, // Default services first
         { name: 'asc' }
