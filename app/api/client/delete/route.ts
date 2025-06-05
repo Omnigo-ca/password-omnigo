@@ -25,19 +25,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if client exists and belongs to user
+    // Check if client exists (any user can delete any client)
     const existingClient = await prisma.client.findFirst({
       where: {
         id: id,
-        userId: userId,
       },
-      include: {
-        _count: {
-          select: {
-            passwords: true
-          }
-        }
-      }
     })
 
     if (!existingClient) {
@@ -47,15 +39,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if client has passwords
-    if (existingClient._count.passwords > 0) {
-      return NextResponse.json(
-        { error: 'Impossible de supprimer un client qui a des mots de passe associés' },
-        { status: 400 }
-      )
-    }
-
-    // Delete the client
+    // Delete the client (this will also handle passwords via cascade or set null)
     await prisma.client.delete({
       where: {
         id: id,
