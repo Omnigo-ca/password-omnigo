@@ -110,7 +110,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
         return
       }
 
-      toast.success('Client créé avec succès!', {
+      toast.success('Compagnie créée avec succès!', {
         style: {
           background: '#7DF9FF',
           color: '#000000',
@@ -197,7 +197,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
             d="M12 4v16m8-8H4"
           />
         </svg>
-        Ajouter un client
+        Ajouter une compagnie
       </button>
 
       {/* Modal */}
@@ -212,12 +212,12 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
             />
 
             {/* Modal panel */}
-            <div className="relative inline-block align-middle bg-white dark:bg-brand-gray/10 border border-brand-gray/20 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-600 backdrop-blur-sm">
+            <div className="relative inline-block align-middle bg-white dark:bg-brand-gray/10 border border-brand-gray/20 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full border border-brand-gray/20 dark:border-brand-white/20 backdrop-blur-sm">
               <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="px-6 pt-6 pb-4 bg-white dark:bg-brand-gray/10 border border-brand-gray/20">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">
-                      Ajouter un nouveau client
+                      Ajouter une nouvelle compagnie
                     </h3>
                     <button
                       type="button"
@@ -236,7 +236,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                     {/* Name field */}
                     <div>
                       <label htmlFor="client-name" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                        Nom du client
+                        Nom de la compagnie
                       </label>
                       <input
                         {...register('name')}
@@ -373,7 +373,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                         Création...
                       </>
                     ) : (
-                      'Créer le client'
+                      'Créer la compagnie'
                     )}
                   </button>
                 </div>

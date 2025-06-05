@@ -26,6 +26,8 @@ model UserKey {
   passwords       Password[]
   // Relation to clients
   clients         Client[]
+  // Relation to services
+  services        Service[]
 
   @@map("user_keys")
 }
@@ -47,6 +49,22 @@ model Client {
   @@map("clients")
 }
 
+model Service {
+  id         String   @id @default(cuid())
+  name       String
+  isCustom   Boolean  @default(false) // True for user-created services
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relation to user key
+  userKey    UserKey  @relation(fields: [userId], references: [userId])
+  // Relation to passwords
+  passwords  Password[]
+
+  @@map("services")
+}
+
 model Password {
   id         String   @id @default(cuid())
   name       String
@@ -56,6 +74,7 @@ model Password {
   iv         String   // IV used for password encryption
   userId     String
   clientId   String?  // Optional client association
+  serviceId  String?  // Optional service association
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -63,6 +82,8 @@ model Password {
   userKey    UserKey  @relation(fields: [userId], references: [userId])
   // Relation to client
   client     Client?  @relation(fields: [clientId], references: [id])
+  // Relation to service
+  service    Service? @relation(fields: [serviceId], references: [id])
 
   @@map("passwords")
 }

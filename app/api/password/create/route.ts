@@ -11,7 +11,8 @@ const createPasswordSchema = z.object({
   username: z.string().optional(),
   url: z.string().url('Invalid URL').optional().or(z.literal('')),
   plaintext: z.string().min(1, 'Password is required'),
-  clientId: z.string().optional(),
+  clientId: z.string().min(1, 'Client is required'),
+  serviceId: z.string().min(1, 'Service is required'),
 })
 
 export async function POST(request: NextRequest) {
@@ -36,23 +37,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { name, username, url, plaintext, clientId } = validation.data
+    const { name, username, url, plaintext, clientId, serviceId } = validation.data
 
-    // Verify client exists and belongs to user if clientId is provided
-    if (clientId) {
-      const client = await prisma.client.findFirst({
-        where: {
-          id: clientId,
-          userId,
-        },
-      })
+    // Verify client exists and belongs to user
+    const client = await prisma.client.findFirst({
+      where: {
+        id: clientId,
+        userId,
+      },
+    })
 
-      if (!client) {
-        return NextResponse.json(
-          { error: 'Client not found or access denied' },
-          { status: 404 }
-        )
-      }
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Client not found or access denied' },
+        { status: 404 }
+      )
+    }
+
+    // Verify service exists and belongs to user
+    const service = await prisma.service.findFirst({
+      where: {
+        id: serviceId,
+        userId,
+      },
+    })
+
+    if (!service) {
+      return NextResponse.json(
+        { error: 'Service not found or access denied' },
+        { status: 404 }
+      )
     }
 
     // Get user's encryption key
@@ -70,7 +84,8 @@ export async function POST(request: NextRequest) {
         ciphertext,
         iv,
         userId,
-        clientId: clientId || null,
+        clientId,
+        serviceId,
       },
       select: {
         id: true,
@@ -78,6 +93,7 @@ export async function POST(request: NextRequest) {
         username: true,
         url: true,
         clientId: true,
+        serviceId: true,
         createdAt: true,
         updatedAt: true,
         client: {
@@ -86,6 +102,12 @@ export async function POST(request: NextRequest) {
             name: true,
             website: true,
             color: true,
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       }

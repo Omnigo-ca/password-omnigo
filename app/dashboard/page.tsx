@@ -7,6 +7,7 @@ import { ClientCard } from '@/components/ClientCard'
 import { AddPasswordModal } from '@/components/AddPasswordModal'
 import { AddClientModal } from '@/components/AddClientModal'
 import { DarkModeToggle } from '@/components/DarkModeToggle'
+import { ServiceSettingsModal } from '@/components/ServiceSettingsModal'
 
 interface Client {
   id: string
@@ -20,6 +21,12 @@ interface Client {
   }
 }
 
+interface Service {
+  id: string
+  name: string
+  isCustom: boolean
+}
+
 interface Password {
   id: string
   name: string
@@ -27,9 +34,11 @@ interface Password {
   url?: string
   userId: string
   clientId?: string
+  serviceId?: string
   createdAt: string
   updatedAt: string
   client?: Client
+  service?: Service
 }
 
 export default function DashboardPage() {
@@ -179,7 +188,7 @@ export default function DashboardPage() {
               Gestionnaire de Mots de Passe
             </h1>
             <p className="text-brand-gray dark:text-brand-white/70">
-              Gérez vos mots de passe et clients en toute sécurité
+              Gérez vos mots de passe et compagnies en toute sécurité
             </p>
           </div>
           <div className="flex items-center space-x-4">
@@ -194,28 +203,31 @@ export default function DashboardPage() {
 
         {/* Navigation Tabs */}
         <div className="mb-6">
-          <nav className="flex space-x-2 bg-gray-100 dark:bg-brand-gray/10 border border-brand-gray/20 p-1 rounded-lg w-fit">
-            <button
-              onClick={() => setActiveTab('passwords')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer ${
-                activeTab === 'passwords'
-                  ? 'bg-white dark:bg-brand-gray/10 text-brand-electric shadow-sm'
-                  : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
-              }`}
-            >
-              Mots de passe ({filteredPasswords.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('clients')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer ${
-                activeTab === 'clients'
-                  ? 'bg-white dark:bg-brand-gray/10 text-brand-electric shadow-sm'
-                  : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
-              }`}
-            >
-              Clients ({clients.length})
-            </button>
-          </nav>
+          <div className="flex items-center justify-between">
+            <nav className="flex space-x-2 bg-gray-100 dark:bg-brand-gray/10 border border-brand-gray/20 p-1 rounded-lg w-fit">
+              <button
+                onClick={() => setActiveTab('passwords')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer ${
+                  activeTab === 'passwords'
+                    ? 'bg-white dark:bg-brand-gray/10 text-brand-electric shadow-sm'
+                    : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
+                }`}
+              >
+                Mots de passe ({filteredPasswords.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('clients')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer ${
+                  activeTab === 'clients'
+                    ? 'bg-white dark:bg-brand-gray/10 text-brand-electric shadow-sm'
+                    : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
+                }`}
+              >
+                Compagnies ({clients.length})
+              </button>
+            </nav>
+            <ServiceSettingsModal />
+          </div>
         </div>
 
         {/* Client Filters - Only show on passwords tab */}
@@ -234,7 +246,7 @@ export default function DashboardPage() {
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
                 </svg>
-                Filtrer par client
+                Filtrer par compagnie
               </button>
 
               {/* Sliding Filter Pills */}
@@ -356,7 +368,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Clients Tab */}
+          {/* Compagnies Tab */}
           <div className={`transition-opacity duration-300 ${activeTab === 'clients' ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'}`}>
             {clients.length === 0 ? (
               <div className="text-center py-12">
@@ -374,10 +386,10 @@ export default function DashboardPage() {
                   />
                 </svg>
                 <h3 className="text-lg font-medium text-brand-gray dark:text-brand-white/70 mb-2">
-                  Aucun client
+                  Aucune compagnie
                 </h3>
                 <p className="text-brand-gray dark:text-brand-white/50 mb-4">
-                  Commencez par ajouter votre premier client
+                  Commencez par ajouter votre première compagnie
                 </p>
                 <AddClientModal onClientAdded={handleClientAdded} />
               </div>

@@ -25,6 +25,7 @@ export async function GET() {
         url: true,
         userId: true,
         clientId: true,
+        serviceId: true,
         createdAt: true,
         updatedAt: true,
         client: {
@@ -33,6 +34,13 @@ export async function GET() {
             name: true,
             website: true,
             color: true,
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+            isCustom: true,
           },
         },
       },

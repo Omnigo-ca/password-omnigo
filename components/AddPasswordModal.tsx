@@ -7,11 +7,12 @@ import { z } from 'zod'
 import toast from 'react-hot-toast'
 
 const addPasswordSchema = z.object({
-  name: z.string().min(1, 'Le nom est requis').max(100, 'Le nom est trop long'),
   username: z.string().optional(),
   url: z.string().url('URL invalide').optional().or(z.literal('')),
   plaintext: z.string().min(1, 'Le mot de passe est requis'),
-  clientId: z.string().optional(),
+  clientId: z.string().min(1, 'La compagnie est requise'),
+  serviceId: z.string().min(1, 'Le service est requis'),
+  customServiceName: z.string().optional(),
 })
 
 type AddPasswordForm = z.infer<typeof addPasswordSchema>
@@ -22,6 +23,12 @@ interface Client {
   website?: string
 }
 
+interface Service {
+  id: string
+  name: string
+  isCustom: boolean
+}
+
 interface AddPasswordModalProps {
   onPasswordAdded?: () => void
 }
@@ -30,16 +37,27 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [clients, setClients] = useState<Client[]>([])
+  const [services, setServices] = useState<Service[]>([])
   const [loadingClients, setLoadingClients] = useState(false)
+  const [loadingServices, setLoadingServices] = useState(false)
+  const [showCustomService, setShowCustomService] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm<AddPasswordForm>({
     resolver: zodResolver(addPasswordSchema),
   })
+
+  const selectedServiceId = watch('serviceId')
+  const selectedClientId = watch('clientId')
+
+  // Get selected client and service names for display
+  const selectedClient = clients.find(c => c.id === selectedClientId)
+  const selectedService = services.find(s => s.id === selectedServiceId)
 
   // Fetch clients when modal opens
   const fetchClients = async () => {
@@ -58,11 +76,34 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
     }
   }
 
+  // Fetch services when modal opens
+  const fetchServices = async () => {
+    try {
+      setLoadingServices(true)
+      const response = await fetch('/api/service/list')
+      
+      if (response.ok) {
+        const data = await response.json()
+        setServices(data.services || [])
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error)
+    } finally {
+      setLoadingServices(false)
+    }
+  }
+
+  // Watch for service selection changes
+  useEffect(() => {
+    setShowCustomService(selectedServiceId === 'custom')
+  }, [selectedServiceId])
+
   // Handle modal focus and body scroll
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
       fetchClients()
+      fetchServices()
       // Focus the first input when modal opens
       setTimeout(() => {
         const firstInput = document.getElementById('clientId')
@@ -72,6 +113,7 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
       }, 100)
     } else {
       document.body.style.overflow = 'unset'
+      setShowCustomService(false)
     }
 
     return () => {
@@ -83,12 +125,59 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
     setIsSubmitting(true)
     
     try {
+      let finalServiceId = data.serviceId
+      let serviceName = selectedService?.name || ''
+
+      // If custom service is selected, create it first
+      if (data.serviceId === 'custom' && data.customServiceName) {
+        const serviceResponse = await fetch('/api/service/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: data.customServiceName,
+          }),
+        })
+
+        if (serviceResponse.ok) {
+          const serviceData = await serviceResponse.json()
+          finalServiceId = serviceData.service.id
+          serviceName = data.customServiceName
+        } else {
+          const serviceError = await serviceResponse.json()
+          toast.error(serviceError.error || 'Erreur lors de la création du service', {
+            style: {
+              background: '#ef4444',
+              color: '#ffffff',
+              fontFamily: 'Meutas, sans-serif',
+              fontWeight: '500',
+            },
+          })
+          return
+        }
+      }
+
+      // Generate password name: "Service + Compagnie"
+      const clientName = selectedClient?.name || ''
+      const generatedName = `${serviceName} + ${clientName}`
+
+      // Create the password with the generated name
+      const passwordData = {
+        name: generatedName,
+        username: data.username,
+        url: data.url,
+        plaintext: data.plaintext,
+        clientId: data.clientId,
+        serviceId: finalServiceId === 'custom' ? undefined : finalServiceId,
+      }
+
       const response = await fetch('/api/password/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(passwordData),
       })
 
       if (!response.ok) {
@@ -222,14 +311,14 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
                     {/* Client selection */}
                     <div>
                       <label htmlFor="clientId" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                        Client (optionnel)
+                        Compagnie
                       </label>
                       <select
                         {...register('clientId')}
                         id="clientId"
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
                       >
-                        <option value="">Aucun client</option>
+                        <option value="">Aucune compagnie</option>
                         {loadingClients ? (
                           <option disabled>Chargement...</option>
                         ) : (
@@ -240,24 +329,58 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
                           ))
                         )}
                       </select>
-                    </div>
-
-                    {/* Name field */}
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                        Nom du service
-                      </label>
-                      <input
-                        {...register('name')}
-                        type="text"
-                        id="name"
-                        placeholder="Ex: Gmail, Facebook, etc."
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
-                      />
-                      {errors.name && (
-                        <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+                      {errors.clientId && (
+                        <p className="mt-1 text-sm text-red-500">{errors.clientId.message}</p>
                       )}
                     </div>
+
+                    {/* Service selection */}
+                    <div>
+                      <label htmlFor="serviceId" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        Service
+                      </label>
+                      <select
+                        {...register('serviceId')}
+                        id="serviceId"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                      >
+                        <option value="">Aucun service</option>
+                        {loadingServices ? (
+                          <option disabled>Chargement...</option>
+                        ) : (
+                          <>
+                            {services.map((service) => (
+                              <option key={service.id} value={service.id}>
+                                {service.name}
+                              </option>
+                            ))}
+                            <option value="custom">+ Ajouter un service personnalisé</option>
+                          </>
+                        )}
+                      </select>
+                      {errors.serviceId && (
+                        <p className="mt-1 text-sm text-red-500">{errors.serviceId.message}</p>
+                      )}
+                    </div>
+
+                    {/* Custom service name field */}
+                    {showCustomService && (
+                      <div>
+                        <label htmlFor="customServiceName" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                          Nom du service personnalisé
+                        </label>
+                        <input
+                          {...register('customServiceName')}
+                          type="text"
+                          id="customServiceName"
+                          placeholder="Ex: Mon Service Privé"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                        />
+                        {errors.customServiceName && (
+                          <p className="mt-1 text-sm text-red-500">{errors.customServiceName.message}</p>
+                        )}
+                      </div>
+                    )}
 
                     {/* Username field */}
                     <div>

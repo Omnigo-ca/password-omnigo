@@ -143,7 +143,7 @@ export function EditClientModal({ client, isOpen, onClose, onClientUpdated }: Ed
         return
       }
 
-      toast.success('Client mis à jour avec succès!', {
+      toast.success('Compagnie modifiée avec succès!', {
         style: {
           background: '#7DF9FF',
           color: '#000000',
@@ -218,7 +218,7 @@ export function EditClientModal({ client, isOpen, onClose, onClientUpdated }: Ed
             <div className="px-6 pt-6 pb-4 bg-white dark:bg-brand-gray/10 border border-brand-gray/20">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">
-                  Modifier le client
+                  Modifier la compagnie
                 </h3>
                 <button
                   type="button"
@@ -236,8 +236,8 @@ export function EditClientModal({ client, isOpen, onClose, onClientUpdated }: Ed
               <div className="space-y-4">
                 {/* Name field */}
                 <div>
-                  <label htmlFor="edit-client-name" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
-                    Nom du client *
+                  <label htmlFor="edit-client-name" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    Nom de la compagnie
                   </label>
                   <input
                     id="edit-client-name"

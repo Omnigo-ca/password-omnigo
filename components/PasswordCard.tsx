@@ -15,6 +15,12 @@ interface Client {
   color: string
 }
 
+interface Service {
+  id: string
+  name: string
+  isCustom: boolean
+}
+
 interface Password {
   id: string
   name: string
@@ -23,6 +29,7 @@ interface Password {
   createdAt: string
   updatedAt: string
   client?: Client
+  service?: Service
 }
 
 interface PasswordCardProps {
@@ -117,22 +124,18 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
   return (
     <>
       <div className="bg-white dark:bg-brand-gray/10 border border-brand-gray/20 dark:border-brand-white/20 rounded-xl p-6 hover:shadow-lg dark:hover:shadow-brand-electric/10 transition-all duration-200">
-        {/* Header with name and client */}
+        {/* Header with name and service */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-3 justify-between">
               <h3 className="text-lg font-semibold text-brand-black dark:text-brand-white">
                 {password.name}
               </h3>
-              {password.client && (
+              {password.service && (
                 <span 
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  style={{ 
-                    backgroundColor: password.client.color,
-                    color: getTextColor(password.client.color)
-                  }}
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-electric text-brand-black"
                 >
-                  {password.client.name}
+                  {password.service.name}
                 </span>
               )}
             </div>
