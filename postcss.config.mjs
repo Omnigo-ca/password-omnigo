@@ -1,8 +1,8 @@
-import tailwindcss from 'tailwindcss'
-import postcssNesting from 'postcss-nesting'
-
 const config = {
-  plugins: [tailwindcss, postcssNesting],
+  plugins: {
+    tailwindcss: {},
+    'postcss-nesting': {},
+  },
 }
 
 export default config
