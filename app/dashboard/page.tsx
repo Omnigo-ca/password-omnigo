@@ -39,6 +39,46 @@ export default function DashboardPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Filter state
+  const [selectedClientIds, setSelectedClientIds] = useState<string[]>([])
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Filter passwords based on selected clients
+  const filteredPasswords = selectedClientIds.length > 0 
+    ? passwords.filter(password => 
+        password.clientId && selectedClientIds.includes(password.clientId)
+      )
+    : passwords
+
+  // Function to determine if text should be white based on background color
+  const getTextColor = (hexColor: string) => {
+    // Remove # if present
+    const color = hexColor.replace('#', '')
+    
+    // Convert to RGB
+    const r = parseInt(color.substr(0, 2), 16)
+    const g = parseInt(color.substr(2, 2), 16)
+    const b = parseInt(color.substr(4, 2), 16)
+    
+    // Calculate luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    
+    // Return white for dark colors, black for light colors
+    return luminance < 0.5 ? '#ffffff' : '#000000'
+  }
+
+  const toggleClientFilter = (clientId: string) => {
+    setSelectedClientIds(prev => 
+      prev.includes(clientId)
+        ? prev.filter(id => id !== clientId)
+        : [...prev, clientId]
+    )
+  }
+
+  const clearFilters = () => {
+    setSelectedClientIds([])
+  }
 
   const fetchPasswords = async () => {
     try {
@@ -163,7 +203,7 @@ export default function DashboardPage() {
                   : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
               }`}
             >
-              Mots de passe ({passwords.length})
+              Mots de passe ({filteredPasswords.length})
             </button>
             <button
               onClick={() => setActiveTab('clients')}
@@ -178,6 +218,77 @@ export default function DashboardPage() {
           </nav>
         </div>
 
+        {/* Client Filters - Only show on passwords tab */}
+        {activeTab === 'passwords' && clients.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center space-x-4">
+              {/* Filter Toggle Button */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 cursor-pointer ${
+                  showFilters || selectedClientIds.length > 0
+                    ? 'bg-brand-electric text-brand-black border-brand-electric'
+                    : 'bg-white dark:bg-brand-gray/10 text-brand-gray dark:text-brand-white border-brand-gray/20 dark:border-brand-white/20 hover:border-brand-electric'
+                }`}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+                </svg>
+                Filtrer par client
+              </button>
+
+              {/* Sliding Filter Pills */}
+              <div className={`flex items-center space-x-2 transition-all duration-300 overflow-hidden ${
+                showFilters ? 'max-w-full opacity-100' : 'max-w-0 opacity-0'
+              }`}>
+                {/* Client Filter Pills */}
+                {clients.map((client, index) => {
+                  const isSelected = selectedClientIds.includes(client.id)
+                  return (
+                    <button
+                      key={client.id}
+                      onClick={() => toggleClientFilter(client.id)}
+                      className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all duration-300 ${
+                        isSelected
+                          ? 'shadow-sm'
+                          : 'opacity-50 hover:opacity-75'
+                      }`}
+                      style={{
+                        backgroundColor: client.color,
+                        color: getTextColor(client.color),
+                        transform: showFilters ? 'translateX(0)' : 'translateX(-100px)',
+                        opacity: showFilters ? (isSelected ? 1 : 0.5) : 0,
+                        transitionDelay: showFilters ? `${index * 100}ms` : '0ms'
+                      }}
+                      title={`Filtrer par ${client.name}`}
+                    >
+                      {client.name}
+                      {isSelected && (
+                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Clear Filters Button - Outside sliding container */}
+              {selectedClientIds.length > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-brand-gray dark:text-brand-white/70 bg-gray-100 dark:bg-brand-gray/20 hover:bg-gray-200 dark:hover:bg-brand-gray/30 rounded-full transition-all duration-200 cursor-pointer"
+                >
+                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Effacer
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Error State */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -189,7 +300,7 @@ export default function DashboardPage() {
         <div className="relative">
           {/* Passwords Tab */}
           <div className={`transition-opacity duration-300 ${activeTab === 'passwords' ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'}`}>
-            {passwords.length === 0 ? (
+            {filteredPasswords.length === 0 ? (
               <div className="text-center py-12">
                 <svg
                   className="mx-auto h-12 w-12 text-brand-gray dark:text-brand-white/50 mb-4"
@@ -204,17 +315,36 @@ export default function DashboardPage() {
                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                   />
                 </svg>
-                <h3 className="text-lg font-medium text-brand-gray dark:text-brand-white/70 mb-2">
-                  Aucun mot de passe
-                </h3>
-                <p className="text-brand-gray dark:text-brand-white/50 mb-4">
-                  Commencez par ajouter votre premier mot de passe
-                </p>
-                <AddPasswordModal onPasswordAdded={handlePasswordAdded} />
+                {selectedClientIds.length > 0 ? (
+                  <>
+                    <h3 className="text-lg font-medium text-brand-gray dark:text-brand-white/70 mb-2">
+                      Aucun mot de passe trouvé
+                    </h3>
+                    <p className="text-brand-gray dark:text-brand-white/50 mb-4">
+                      Aucun mot de passe ne correspond aux filtres sélectionnés
+                    </p>
+                    <button
+                      onClick={clearFilters}
+                      className="inline-flex items-center px-4 py-2 bg-brand-electric text-brand-black font-medium text-sm rounded-lg hover:bg-brand-electric/80 transition-all duration-200 cursor-pointer"
+                    >
+                      Effacer les filtres
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-lg font-medium text-brand-gray dark:text-brand-white/70 mb-2">
+                      Aucun mot de passe
+                    </h3>
+                    <p className="text-brand-gray dark:text-brand-white/50 mb-4">
+                      Commencez par ajouter votre premier mot de passe
+                    </p>
+                    <AddPasswordModal onPasswordAdded={handlePasswordAdded} />
+                  </>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {passwords.map((password) => (
+                {filteredPasswords.map((password) => (
                   <PasswordCard 
                     key={password.id} 
                     password={password} 
