@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -173,7 +173,7 @@ export function EditClientModal({ client, isOpen, onClose, onClientUpdated }: Ed
     }
   }
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (!isSubmitting) {
       onClose()
       reset()
@@ -181,7 +181,7 @@ export function EditClientModal({ client, isOpen, onClose, onClientUpdated }: Ed
       setCustomColor('')
       setUseCustomColor(false)
     }
-  }
+  }, [isSubmitting, onClose, reset, client.color])
 
   // Handle escape key
   useEffect(() => {

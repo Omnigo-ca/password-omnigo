@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -77,7 +77,6 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
   })
 
   const selectedServiceId = watch('serviceId')
-  const selectedService = services.find(s => s.id === selectedServiceId)
 
   // Show custom service field when "custom" is selected
   useEffect(() => {
@@ -222,7 +221,7 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
     }
   }
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (!isSubmitting) {
       onClose()
       reset({
@@ -234,7 +233,7 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
         plaintext: '',
       })
     }
-  }
+  }, [isSubmitting, onClose, reset, password])
 
   // Handle escape key
   useEffect(() => {

@@ -225,13 +225,13 @@ export function ServiceSettingsModal({ onServicesUpdated }: ServiceSettingsModal
     reset({ color: '#4ECDC4' })
   }
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (!isSubmitting) {
       setIsOpen(false)
       setEditingService(null)
       reset({ color: '#4ECDC4' })
     }
-  }
+  }, [isSubmitting, reset])
 
   // Handle escape key
   useEffect(() => {
