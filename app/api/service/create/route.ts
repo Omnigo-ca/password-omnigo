@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 const createServiceSchema = z.object({
   name: z.string().min(1, 'Le nom du service est requis').max(100, 'Le nom ne peut pas dépasser 100 caractères'),
+  color: z.string().min(1, 'La couleur est requise'),
 })
 
 export async function POST(request: NextRequest) {
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest) {
     const service = await prisma.service.create({
       data: {
         name: validatedData.name,
+        color: validatedData.color,
         isCustom: true, // User-created services are always custom
         userId: userId
       }

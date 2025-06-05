@@ -105,7 +105,7 @@ export function ClientCard({ client, onClientDeleted, onClientUpdated }: ClientC
         {/* Header with name and color */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3 justify-between">
+            <div className="flex items-start gap-2 mb-3 justify-between">
               <h3 className="text-lg font-semibold text-brand-black dark:text-brand-white">
                 {client.name}
               </h3>
@@ -217,7 +217,7 @@ export function ClientCard({ client, onClientDeleted, onClientUpdated }: ClientC
                     Supprimer la compagnie
                   </h3>
                   <p className="text-brand-gray dark:text-brand-white/70 mb-6">
-                    Êtes-vous sûr de vouloir supprimer la compagnie "{client.name}" ? Cette action est irréversible.
+                    Êtes-vous sûr de vouloir supprimer la compagnie &quot;{client.name}&quot; ? Cette action est irréversible.
                   </p>
                 </div>
               </div>

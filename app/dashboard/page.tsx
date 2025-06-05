@@ -24,6 +24,7 @@ interface Client {
 interface Service {
   id: string
   name: string
+  color?: string
   isCustom: boolean
 }
 
@@ -46,29 +47,49 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'passwords' | 'clients'>('passwords')
   const [passwords, setPasswords] = useState<Password[]>([])
   const [clients, setClients] = useState<Client[]>([])
+  const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
   // Filter state
   const [selectedClientIds, setSelectedClientIds] = useState<string[]>([])
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
   const [showFilters, setShowFilters] = useState(false)
+  const [showServiceFilters, setShowServiceFilters] = useState(false)
 
-  // Filter passwords based on selected clients
-  const filteredPasswords = selectedClientIds.length > 0 
-    ? passwords.filter(password => 
-        password.clientId && selectedClientIds.includes(password.clientId)
-      )
-    : passwords
+  // Filter passwords based on selected clients and services
+  const filteredPasswords = passwords.filter(password => {
+    const clientMatch = selectedClientIds.length === 0 || 
+      (password.clientId && selectedClientIds.includes(password.clientId))
+    const serviceMatch = selectedServiceIds.length === 0 || 
+      (password.serviceId && selectedServiceIds.includes(password.serviceId))
+    return clientMatch && serviceMatch
+  })
 
   // Function to determine if text should be white based on background color
-  const getTextColor = (hexColor: string) => {
+  const getTextColor = (hexColor?: string) => {
+    // Handle undefined, null, or empty color values
+    if (!hexColor || typeof hexColor !== 'string') {
+      return '#000000' // Default to black text
+    }
+    
     // Remove # if present
     const color = hexColor.replace('#', '')
+    
+    // Validate hex color format (should be 6 characters)
+    if (color.length !== 6) {
+      return '#000000' // Default to black text for invalid colors
+    }
     
     // Convert to RGB
     const r = parseInt(color.substr(0, 2), 16)
     const g = parseInt(color.substr(2, 2), 16)
     const b = parseInt(color.substr(4, 2), 16)
+    
+    // Check for invalid RGB values
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+      return '#000000' // Default to black text for invalid RGB
+    }
     
     // Calculate luminance
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
@@ -85,8 +106,17 @@ export default function DashboardPage() {
     )
   }
 
+  const toggleServiceFilter = (serviceId: string) => {
+    setSelectedServiceIds(prev => 
+      prev.includes(serviceId)
+        ? prev.filter(id => id !== serviceId)
+        : [...prev, serviceId]
+    )
+  }
+
   const clearFilters = () => {
     setSelectedClientIds([])
+    setSelectedServiceIds([])
   }
 
   const fetchPasswords = async () => {
@@ -121,12 +151,28 @@ export default function DashboardPage() {
     }
   }
 
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('/api/service/list')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch services')
+      }
+
+      const data = await response.json()
+      setServices(data.services || [])
+    } catch (err) {
+      console.error('Error fetching services:', err)
+      setError('Erreur lors du chargement des services')
+    }
+  }
+
   const fetchData = useCallback(async () => {
     setLoading(true)
     setError(null)
     
     try {
-      await Promise.all([fetchPasswords(), fetchClients()])
+      await Promise.all([fetchPasswords(), fetchClients(), fetchServices()])
     } finally {
       setLoading(false)
     }
@@ -260,7 +306,7 @@ export default function DashboardPage() {
                     <button
                       key={client.id}
                       onClick={() => toggleClientFilter(client.id)}
-                      className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all duration-300 ${
+                      className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all duration-300 whitespace-nowrap ${
                         isSelected
                           ? 'shadow-sm'
                           : 'opacity-50 hover:opacity-75'
@@ -276,7 +322,7 @@ export default function DashboardPage() {
                     >
                       {client.name}
                       {isSelected && (
-                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 ml-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
@@ -286,7 +332,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Clear Filters Button - Outside sliding container */}
-              {selectedClientIds.length > 0 && (
+              {(selectedClientIds.length > 0 || selectedServiceIds.length > 0) && (
                 <button
                   onClick={clearFilters}
                   className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-brand-gray dark:text-brand-white/70 bg-gray-100 dark:bg-brand-gray/20 hover:bg-gray-200 dark:hover:bg-brand-gray/30 rounded-full transition-all duration-200 cursor-pointer"
@@ -297,6 +343,64 @@ export default function DashboardPage() {
                   Effacer
                 </button>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Service Filters - Only show on passwords tab */}
+        {activeTab === 'passwords' && services.length > 0 && (
+          <div className="mb-6 -mt-3">
+            <div className="flex items-center space-x-4">
+              {/* Service Filter Toggle Button */}
+              <button
+                onClick={() => setShowServiceFilters(!showServiceFilters)}
+                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 cursor-pointer ${
+                  showServiceFilters || selectedServiceIds.length > 0
+                    ? 'bg-brand-electric text-brand-black border-brand-electric'
+                    : 'bg-white dark:bg-brand-gray/10 text-brand-gray dark:text-brand-white border-brand-gray/20 dark:border-brand-white/20 hover:border-brand-electric'
+                }`}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+                </svg>
+                Filtrer par service
+              </button>
+
+              {/* Sliding Service Filter Pills */}
+              <div className={`flex items-center space-x-2 transition-all duration-300 overflow-hidden ${
+                showServiceFilters ? 'max-w-full opacity-100' : 'max-w-0 opacity-0'
+              }`}>
+                {/* Service Filter Pills */}
+                {services.map((service, index) => {
+                  const isSelected = selectedServiceIds.includes(service.id)
+                  return (
+                    <button
+                      key={service.id}
+                      onClick={() => toggleServiceFilter(service.id)}
+                      className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                        isSelected
+                          ? 'shadow-sm'
+                          : 'opacity-50 hover:opacity-75'
+                      }`}
+                      style={{
+                        backgroundColor: service.color || '#4ECDC4',
+                        color: getTextColor(service.color || '#4ECDC4'),
+                        transform: showServiceFilters ? 'translateX(0)' : 'translateX(-100px)',
+                        opacity: showServiceFilters ? (isSelected ? 1 : 0.5) : 0,
+                        transitionDelay: showServiceFilters ? `${index * 100}ms` : '0ms'
+                      }}
+                      title={`Filtrer par ${service.name}`}
+                    >
+                      {service.name}
+                      {isSelected && (
+                        <svg className="w-3 h-3 ml-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -360,6 +464,7 @@ export default function DashboardPage() {
                   <PasswordCard 
                     key={password.id} 
                     password={password} 
+                    allPasswords={filteredPasswords}
                     onPasswordDeleted={handlePasswordDeleted}
                     onPasswordUpdated={handlePasswordUpdated}
                   />

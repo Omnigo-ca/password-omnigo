@@ -26,6 +26,7 @@ interface Client {
 interface Service {
   id: string
   name: string
+  color?: string
   isCustom: boolean
 }
 
@@ -158,9 +159,9 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
         }
       }
 
-      // Generate password name: "Service + Compagnie"
+      // Generate password name: "Service - Compagnie"
       const clientName = selectedClient?.name || ''
-      const generatedName = `${serviceName} + ${clientName}`
+      const generatedName = `${serviceName} - ${clientName}`
 
       // Create the password with the generated name
       const passwordData = {

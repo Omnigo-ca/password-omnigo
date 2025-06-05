@@ -6,7 +6,6 @@ import { CopyUsernameButton } from './CopyUsernameButton'
 import { EditPasswordModal } from './EditPasswordModal'
 import toast from 'react-hot-toast'
 import { FaExternalLinkAlt } from 'react-icons/fa'
-import { FaEarthAmericas } from 'react-icons/fa6'
 
 interface Client {
   id: string
@@ -18,6 +17,7 @@ interface Client {
 interface Service {
   id: string
   name: string
+  color?: string
   isCustom: boolean
 }
 
@@ -34,14 +34,54 @@ interface Password {
 
 interface PasswordCardProps {
   password: Password
+  allPasswords: Password[]
   onPasswordDeleted?: () => void
   onPasswordUpdated?: () => void
 }
 
-export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }: PasswordCardProps) {
+export function PasswordCard({ password, allPasswords, onPasswordDeleted, onPasswordUpdated }: PasswordCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+
+  // Check if there are multiple accounts for the same service and company
+  const hasDuplicateServiceCompany = allPasswords.filter(p => 
+    p.service?.id === password.service?.id && 
+    p.client?.id === password.client?.id &&
+    p.id !== password.id
+  ).length > 0
+
+  // Function to determine if text should be white based on background color
+  const getTextColor = (hexColor?: string) => {
+    // Handle undefined, null, or empty color values
+    if (!hexColor || typeof hexColor !== 'string') {
+      return '#000000' // Default to black text
+    }
+    
+    // Remove # if present
+    const color = hexColor.replace('#', '')
+    
+    // Validate hex color format (should be 6 characters)
+    if (color.length !== 6) {
+      return '#000000' // Default to black text for invalid colors
+    }
+    
+    // Convert to RGB
+    const r = parseInt(color.substr(0, 2), 16)
+    const g = parseInt(color.substr(2, 2), 16)
+    const b = parseInt(color.substr(4, 2), 16)
+    
+    // Check for invalid RGB values
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+      return '#000000' // Default to black text for invalid RGB
+    }
+    
+    // Calculate luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    
+    // Return white for dark colors, black for light colors
+    return luminance < 0.5 ? '#ffffff' : '#000000'
+  }
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -104,40 +144,47 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
     }
   }
 
-  // Function to determine if text should be white based on background color
-  const getTextColor = (hexColor: string) => {
-    // Remove # if present
-    const color = hexColor.replace('#', '')
-    
-    // Convert to RGB
-    const r = parseInt(color.substr(0, 2), 16)
-    const g = parseInt(color.substr(2, 2), 16)
-    const b = parseInt(color.substr(4, 2), 16)
-    
-    // Calculate luminance
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-    
-    // Return white for dark colors, black for light colors
-    return luminance < 0.5 ? '#ffffff' : '#000000'
-  }
-
   return (
     <>
       <div className="bg-white dark:bg-brand-gray/10 border border-brand-gray/20 dark:border-brand-white/20 rounded-xl p-6 hover:shadow-lg dark:hover:shadow-brand-electric/10 transition-all duration-200">
-        {/* Header with name and service */}
+        {/* Header with username */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3 justify-between">
-              <h3 className="text-lg font-semibold text-brand-black dark:text-brand-white">
-                {password.name}
+            <div className="mb-3">
+              <h3 className="text-lg font-semibold text-brand-black dark:text-brand-white mb-2">
+                {password.username || 'Aucun nom d\'utilisateur'}
               </h3>
-              {password.service && (
-                <span 
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-electric text-brand-black"
-                >
-                  {password.service.name}
-                </span>
+              {hasDuplicateServiceCompany && password.username && (
+                <p className="text-sm text-brand-gray dark:text-brand-white/70 mb-2">
+                  {password.name}
+                </p>
               )}
+              
+              {/* Pills under the title */}
+              <div className="flex flex-wrap gap-2">
+                {password.service && (
+                  <span 
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap"
+                    style={{
+                      backgroundColor: password.service.color || '#4ECDC4',
+                      color: getTextColor(password.service.color || '#4ECDC4')
+                    }}
+                  >
+                    {password.service.name}
+                  </span>
+                )}
+                {password.client && (
+                  <span 
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
+                    style={{
+                      backgroundColor: password.client.color,
+                      color: getTextColor(password.client.color)
+                    }}
+                  >
+                    {password.client.name}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="text-sm text-brand-gray dark:text-brand-white/50">
             Modifié le {new Date(password.updatedAt).toLocaleDateString('fr-FR', {
@@ -171,32 +218,32 @@ export function PasswordCard({ password, onPasswordDeleted, onPasswordUpdated }:
             <button
               onClick={() => window.open(password.url, '_blank')}
               className="w-full bg-brand-electric hover:bg-brand-electric/80 text-brand-black font-medium text-sm rounded-lg py-2.5 px-4 flex items-center justify-center transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-brand-electric focus:ring-offset-2 dark:focus:ring-offset-brand-gray cursor-pointer"
-              title="Ouvrir l'URL de connexion"
+              title="Ouvrir l&apos;URL de connexion"
             >
               <FaExternalLinkAlt className="w-4 h-4 mr-2" />
-              <span>Ouvrir l'URL de connexion</span>
+              <span>Ouvrir l&apos;URL de connexion</span>
             </button>
           )}
-          <div className="flex items-center justify-left gap-4 ">
+          <div className="flex items-center justify-left gap-4 p-2">
             <button 
-                onClick={() => setShowEditModal(true)}
-                className="p-2 text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white hover:bg-brand-gray/10 dark:hover:bg-brand-white/10 rounded-lg transition-colors duration-200 cursor-pointer"
-                title="Modifier"
-                >
-            <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              onClick={() => setShowEditModal(true)}
+              className="text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white hover:bg-brand-gray/10 dark:hover:bg-brand-white/10 rounded-lg transition-colors duration-200 cursor-pointer"
+              title="Modifier"
+            >
+              <svg className="w-5 h-5 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+              </svg>
             </button>
             
             <button 
-            onClick={() => setShowDeleteConfirm(true)}
-            disabled={isDeleting}
-            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            title="Supprimer"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={isDeleting}
+              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              title="Supprimer"
             >
-            <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
+              </svg>
             </button>
           </div>
           

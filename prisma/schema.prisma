@@ -52,6 +52,7 @@ model Client {
 model Service {
   id         String   @id @default(cuid())
   name       String
+  color      String   @default("#4ECDC4") // Service color (hex)
   isCustom   Boolean  @default(false) // True for user-created services
   userId     String
   createdAt  DateTime @default(now())

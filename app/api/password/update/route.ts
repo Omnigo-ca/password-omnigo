@@ -12,10 +12,11 @@ const updatePasswordSchema = z.object({
   username: z.string().optional(),
   url: z.string().url('URL invalide').optional().or(z.literal('')),
   plaintext: z.string().optional(),
-  clientId: z.string().optional(),
+  clientId: z.string().optional().nullable(),
+  serviceId: z.string().optional().nullable(),
 })
 
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest) {
   try {
     const { userId } = await auth()
     
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { id, name, username, url, plaintext, clientId } = validationResult.data
+    const { id, name, username, url, plaintext, clientId, serviceId } = validationResult.data
 
     // Check if password exists and belongs to user
     const existingPassword = await prisma.password.findFirst({
@@ -71,6 +72,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check if service exists and belongs to user (if serviceId is provided)
+    if (serviceId) {
+      const service = await prisma.service.findFirst({
+        where: {
+          id: serviceId,
+          userId: userId,
+        },
+      })
+
+      if (!service) {
+        return NextResponse.json(
+          { error: 'Service non trouvé' },
+          { status: 404 }
+        )
+      }
+    }
+
     // Check if another password with the same name exists (excluding current password)
     const duplicatePassword = await prisma.password.findFirst({
       where: {
@@ -90,7 +108,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Encrypt the password only if a new one is provided
-    let encryptedPassword: string | undefined = undefined
+    let ciphertext: string | undefined = undefined
+    let iv: string | undefined = undefined
     if (plaintext && plaintext.trim() !== '') {
       const encryptionKey = process.env.ENCRYPTION_KEY
       if (!encryptionKey) {
@@ -99,7 +118,11 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         )
       }
-      encryptedPassword = CryptoJS.AES.encrypt(plaintext, encryptionKey).toString()
+      
+      // Generate a random IV for this encryption
+      const randomIv = CryptoJS.lib.WordArray.random(16)
+      iv = randomIv.toString()
+      ciphertext = CryptoJS.AES.encrypt(plaintext, encryptionKey, { iv: randomIv }).toString()
     }
 
     // Prepare update data
@@ -108,19 +131,23 @@ export async function POST(request: NextRequest) {
       username: string | null
       url: string | null
       clientId: string | null
+      serviceId: string | null
       updatedAt: Date
-      encryptedPassword?: string
+      ciphertext?: string
+      iv?: string
     } = {
       name,
       username: username || null,
       url: url || null,
       clientId: clientId || null,
+      serviceId: serviceId || null,
       updatedAt: new Date(),
     }
 
     // Only update password if a new one was provided
-    if (encryptedPassword) {
-      updateData.encryptedPassword = encryptedPassword
+    if (ciphertext && iv) {
+      updateData.ciphertext = ciphertext
+      updateData.iv = iv
     }
 
     // Update the password
@@ -131,6 +158,7 @@ export async function POST(request: NextRequest) {
       data: updateData,
       include: {
         client: true,
+        service: true,
       }
     })
 
@@ -145,6 +173,7 @@ export async function POST(request: NextRequest) {
           createdAt: updatedPassword.createdAt,
           updatedAt: updatedPassword.updatedAt,
           client: updatedPassword.client,
+          service: updatedPassword.service,
         }
       },
       { status: 200 }
@@ -159,4 +188,9 @@ export async function POST(request: NextRequest) {
   } finally {
     await prisma.$disconnect()
   }
+}
+
+// Keep POST for backward compatibility
+export async function POST(request: NextRequest) {
+  return PUT(request)
 } 

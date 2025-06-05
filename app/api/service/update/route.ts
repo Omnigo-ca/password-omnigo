@@ -6,6 +6,7 @@ import { z } from 'zod'
 const updateServiceSchema = z.object({
   id: z.string().min(1, 'ID du service requis'),
   name: z.string().min(1, 'Le nom du service est requis').max(100, 'Le nom ne peut pas dépasser 100 caractères'),
+  color: z.string().min(1, 'La couleur est requise'),
 })
 
 export async function PUT(request: NextRequest) {
@@ -56,7 +57,8 @@ export async function PUT(request: NextRequest) {
         id: validatedData.id
       },
       data: {
-        name: validatedData.name
+        name: validatedData.name,
+        color: validatedData.color
       }
     })
 

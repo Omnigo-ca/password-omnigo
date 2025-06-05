@@ -13,6 +13,13 @@ interface Client {
   color: string
 }
 
+interface Service {
+  id: string
+  name: string
+  color?: string
+  isCustom: boolean
+}
+
 interface Password {
   id: string
   name: string
@@ -21,6 +28,7 @@ interface Password {
   createdAt: string
   updatedAt: string
   client?: Client
+  service?: Service
 }
 
 interface EditPasswordModalProps {
@@ -31,11 +39,12 @@ interface EditPasswordModalProps {
 }
 
 const editPasswordSchema = z.object({
-  name: z.string().min(1, 'Le nom est requis').max(100, 'Le nom ne peut pas dépasser 100 caractères'),
+  clientId: z.string().optional(),
+  serviceId: z.string().optional(),
+  customServiceName: z.string().optional(),
   username: z.string().optional(),
   url: z.string().url('URL invalide').optional().or(z.literal('')),
   plaintext: z.string().optional(),
-  clientId: z.string().optional(),
 })
 
 type EditPasswordForm = z.infer<typeof editPasswordSchema>
@@ -43,34 +52,47 @@ type EditPasswordForm = z.infer<typeof editPasswordSchema>
 export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated }: EditPasswordModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [clients, setClients] = useState<Client[]>([])
+  const [services, setServices] = useState<Service[]>([])
   const [loadingClients, setLoadingClients] = useState(false)
+  const [loadingServices, setLoadingServices] = useState(false)
+  const [showCustomService, setShowCustomService] = useState(false)
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
     reset,
+    watch,
+    formState: { errors }
   } = useForm<EditPasswordForm>({
     resolver: zodResolver(editPasswordSchema),
     defaultValues: {
-      name: password.name,
+      clientId: password.client?.id || '',
+      serviceId: password.service?.id || '',
       username: password.username || '',
       url: password.url || '',
       plaintext: '',
-      clientId: password.client?.id || '',
-    },
+    }
   })
 
-  // Fetch clients when modal opens
+  const selectedServiceId = watch('serviceId')
+  const selectedService = services.find(s => s.id === selectedServiceId)
+
+  // Show custom service field when "custom" is selected
+  useEffect(() => {
+    setShowCustomService(selectedServiceId === 'custom')
+  }, [selectedServiceId])
+
   const fetchClients = async () => {
     try {
       setLoadingClients(true)
       const response = await fetch('/api/client/list')
       
-      if (response.ok) {
-        const data = await response.json()
-        setClients(data.clients || [])
+      if (!response.ok) {
+        throw new Error('Failed to fetch clients')
       }
+
+      const data = await response.json()
+      setClients(data.clients || [])
     } catch (error) {
       console.error('Error fetching clients:', error)
     } finally {
@@ -78,36 +100,29 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
     }
   }
 
-  // Reset form when password changes
-  useEffect(() => {
-    if (password) {
-      reset({
-        name: password.name,
-        username: password.username || '',
-        url: password.url || '',
-        plaintext: '',
-        clientId: password.client?.id || '',
-      })
-    }
-  }, [password, reset])
+  const fetchServices = async () => {
+    try {
+      setLoadingServices(true)
+      const response = await fetch('/api/service/list')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch services')
+      }
 
-  // Handle modal focus and body scroll
+      const data = await response.json()
+      setServices(data.services || [])
+    } catch (error) {
+      console.error('Error fetching services:', error)
+    } finally {
+      setLoadingServices(false)
+    }
+  }
+
+  // Fetch data when modal opens
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
       fetchClients()
-      setTimeout(() => {
-        const firstInput = document.getElementById('edit-password-name')
-        if (firstInput) {
-          firstInput.focus()
-        }
-      }, 100)
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset'
+      fetchServices()
     }
   }, [isOpen])
 
@@ -115,14 +130,56 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
     setIsSubmitting(true)
     
     try {
+      let finalServiceId = data.serviceId
+      let serviceName = selectedService?.name || ''
+
+      // If custom service is selected, create it first
+      if (data.serviceId === 'custom' && data.customServiceName) {
+        const serviceResponse = await fetch('/api/service/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: data.customServiceName,
+          }),
+        })
+
+        if (serviceResponse.ok) {
+          const serviceData = await serviceResponse.json()
+          finalServiceId = serviceData.service.id
+          serviceName = data.customServiceName
+        } else {
+          const serviceError = await serviceResponse.json()
+          toast.error(serviceError.error || 'Erreur lors de la création du service', {
+            style: {
+              background: '#ef4444',
+              color: '#ffffff',
+              fontFamily: 'Meutas, sans-serif',
+              fontWeight: '500',
+            },
+          })
+          return
+        }
+      }
+
+      // Generate password name if service or client changed
+      const clientName = clients.find(c => c.id === data.clientId)?.name || ''
+      const generatedName = serviceName && clientName ? `${serviceName} - ${clientName}` : password.name
+
       const response = await fetch('/api/password/update', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           id: password.id,
-          ...data,
+          name: generatedName,
+          username: data.username,
+          url: data.url,
+          plaintext: data.plaintext || undefined,
+          clientId: data.clientId || null,
+          serviceId: finalServiceId === 'custom' ? null : (finalServiceId || null),
         }),
       })
 
@@ -148,11 +205,11 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
         },
       })
 
+      onClose()
+      
       if (onPasswordUpdated) {
         onPasswordUpdated()
       }
-
-      handleClose()
 
     } catch (error) {
       console.error('Error updating password:', error)
@@ -172,7 +229,13 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
   const handleClose = () => {
     if (!isSubmitting) {
       onClose()
-      reset()
+      reset({
+        clientId: password.client?.id || '',
+        serviceId: password.service?.id || '',
+        username: password.username || '',
+        url: password.url || '',
+        plaintext: '',
+      })
     }
   }
 
@@ -251,23 +314,47 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
                   </select>
                 </div>
 
-                {/* Name field */}
+                {/* Service selection */}
                 <div>
-                  <label htmlFor="edit-password-name" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                    Nom du service *
+                  <label htmlFor="edit-password-service" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    Service *
                   </label>
-                  <input
-                    {...register('name')}
-                    type="text"
-                    id="edit-password-name"
+                  <select
+                    {...register('serviceId')}
+                    id="edit-password-service"
                     disabled={isSubmitting}
-                    placeholder="Ex: Gmail, Facebook, etc."
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-                  )}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Sélectionnez un service</option>
+                    {loadingServices ? (
+                      <option disabled>Chargement...</option>
+                    ) : (
+                      services.map((service) => (
+                        <option key={service.id} value={service.id}>
+                          {service.name}
+                        </option>
+                      ))
+                    )}
+                    <option value="custom">Autre service</option>
+                  </select>
                 </div>
+
+                {/* Custom service name */}
+                {showCustomService && (
+                  <div>
+                    <label htmlFor="edit-password-custom-service-name" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                      Nom du service personnalisé
+                    </label>
+                    <input
+                      {...register('customServiceName')}
+                      type="text"
+                      id="edit-password-custom-service-name"
+                      disabled={isSubmitting}
+                      placeholder="Ex: Mon service personnalisé"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                )}
 
                 {/* Username field */}
                 <div>
