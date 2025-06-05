@@ -1,0 +1,13 @@
+{
+  "buildCommand": "npx prisma generate --no-engine && next build",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "PRISMA_GENERATE_SKIP_AUTOINSTALL": "true"
+  },
+  "regions": ["iad1"],
+  "framework": "nextjs"
+} 

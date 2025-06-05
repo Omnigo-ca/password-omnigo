@@ -45,6 +45,25 @@ npm run build
 npm run start
 ```
 
+## Déploiement Vercel
+
+```bash
+# Installer Vercel CLI
+npm i -g vercel
+
+# Se connecter à Vercel
+vercel login
+
+# Déployer en mode preview
+vercel
+
+# Déployer en production
+vercel --prod
+
+# Appliquer le schéma sur la base de production
+DATABASE_URL="your_production_neon_url" npx prisma db push
+```
+
 ## Tests
 
 ```bash
@@ -79,12 +98,31 @@ npm run db:push
 npm run db:push
 ```
 
+### Erreur Vercel "prisma://" protocol
+```bash
+# Vérifier que DATABASE_URL utilise le format PostgreSQL standard
+echo $DATABASE_URL
+
+# Doit commencer par postgresql:// et non prisma://
+```
+
 ## Variables d'environnement requises
 
+### Développement (.env)
 ```env
 DATABASE_URL="postgresql://username:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require"
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_xxx"
 CLERK_SECRET_KEY="sk_test_xxx"
 ENCRYPTION_KEY="your_32_character_encryption_key"
 MASTER_KEY="your_32_character_master_key"
+```
+
+### Production (Vercel)
+```env
+DATABASE_URL="postgresql://username:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require&connect_timeout=15"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_live_xxx"
+CLERK_SECRET_KEY="sk_live_xxx"
+ENCRYPTION_KEY="your_production_32_character_key"
+MASTER_KEY="your_production_master_key"
+NEXTAUTH_URL="https://your-app.vercel.app"
 ``` 
