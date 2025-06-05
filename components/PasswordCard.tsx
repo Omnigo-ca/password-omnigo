@@ -143,14 +143,8 @@ export function PasswordCard({ password, onPasswordDeleted }: PasswordCardProps)
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-brand-gray dark:text-brand-white/50">
-            Modifié le {new Date(password.updatedAt).toLocaleDateString('fr-FR', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </div>
+        <div className="flex items-left justify-between flex-col gap-4">
+          
           
           <div className="flex items-center space-x-2">
             {password.username && (
@@ -162,25 +156,35 @@ export function PasswordCard({ password, onPasswordDeleted }: PasswordCardProps)
             
             <CopyButton passwordId={password.id} />
             
+            
+          </div>
+          <div className="flex items-center justify-left gap-4 ">
             <button 
-              className="p-2 text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white hover:bg-brand-gray/10 dark:hover:bg-brand-white/10 rounded-lg transition-colors duration-200"
-              title="Modifier"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                className="p-2 text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white hover:bg-brand-gray/10 dark:hover:bg-brand-white/10 rounded-lg transition-colors duration-200 cursor-pointer"
+                title="Modifier"
+                >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
+            </svg>
             </button>
             
             <button 
-              onClick={() => setShowDeleteConfirm(true)}
-              disabled={isDeleting}
-              className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Supprimer"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={isDeleting}
+            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            title="Supprimer"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+            </svg>
             </button>
+          </div>
+          <div className="text-sm text-brand-gray dark:text-brand-white/50">
+            Modifié le {new Date(password.updatedAt).toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
           </div>
         </div>
       </div>
@@ -217,7 +221,7 @@ export function PasswordCard({ password, onPasswordDeleted }: PasswordCardProps)
                 </div>
               </div>
 
-              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-600">
+              <div className="px-6 py-4 bg-gray-50 dark:bg-brand-gray/10 flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-600">
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}

@@ -227,7 +227,7 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
                       <select
                         {...register('clientId')}
                         id="clientId"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
                       >
                         <option value="">Aucun client</option>
                         {loadingClients ? (
@@ -252,7 +252,7 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
                         type="text"
                         id="name"
                         placeholder="Ex: Gmail, Facebook, etc."
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
                       />
                       {errors.name && (
                         <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
@@ -269,7 +269,7 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
                         type="text"
                         id="username"
                         placeholder="Ex: john.doe@example.com"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
                       />
                       {errors.username && (
                         <p className="mt-1 text-sm text-red-500">{errors.username.message}</p>
@@ -286,7 +286,7 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
                         type="url"
                         id="url"
                         placeholder="https://example.com/login"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
                       />
                       {errors.url && (
                         <p className="mt-1 text-sm text-red-500">{errors.url.message}</p>
@@ -303,7 +303,7 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
                         type="password"
                         id="plaintext"
                         placeholder="Entrez votre mot de passe"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
                       />
                       {errors.plaintext && (
                         <p className="mt-1 text-sm text-red-500">{errors.plaintext.message}</p>
@@ -313,7 +313,7 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-600">
+                <div className="px-6 py-4 bg-gray-50 dark:bg-brand-gray/10 flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-600">
                   <button
                     type="button"
                     onClick={handleClose}

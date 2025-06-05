@@ -146,7 +146,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('passwords')}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
                 activeTab === 'passwords'
-                  ? 'bg-white dark:bg-gray-700 text-brand-electric shadow-sm'
+                  ? 'bg-white dark:bg-brand-gray/10 text-brand-electric shadow-sm'
                   : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
               }`}
             >
@@ -156,7 +156,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('clients')}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
                 activeTab === 'clients'
-                  ? 'bg-white dark:bg-gray-700 text-brand-electric shadow-sm'
+                  ? 'bg-white dark:bg-brand-gray/10 text-brand-electric shadow-sm'
                   : 'text-brand-gray dark:text-brand-white/70 hover:text-brand-black dark:hover:text-brand-white'
               }`}
             >
@@ -254,7 +254,7 @@ export default function DashboardPage() {
                             href={client.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-brand-electric hover:underline break-all"
+                            className="text-sm text-brand-electric hover:underline break-all py-1 px-2 rounded-lg"
                           >
                             {client.website}
                           </a>

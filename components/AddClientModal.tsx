@@ -243,7 +243,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                         type="text"
                         id="client-name"
                         placeholder="Ex: Google, Microsoft, etc."
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
                       />
                       {errors.name && (
                         <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
@@ -260,7 +260,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                         type="url"
                         id="client-website"
                         placeholder="https://example.com"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200"
                       />
                       {errors.website && (
                         <p className="mt-1 text-sm text-red-500">{errors.website.message}</p>
@@ -323,7 +323,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                           value={customColor}
                           onChange={(e) => setCustomColor(e.target.value)}
                           disabled={!useCustomColor}
-                          className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-brand-gray/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-brand-electric focus:border-transparent transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </div>
                       
@@ -335,7 +335,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-600">
+                <div className="px-6 py-4 bg-gray-50 dark:bg-brand-gray/10 flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-600">
                   <button
                     type="button"
                     onClick={handleClose}
