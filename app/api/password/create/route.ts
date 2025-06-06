@@ -39,32 +39,30 @@ export async function POST(request: NextRequest) {
 
     const { name, username, url, plaintext, clientId, serviceId } = validation.data
 
-    // Verify client exists and belongs to user
+    // Verify client exists (shared across company)
     const client = await prisma.client.findFirst({
       where: {
         id: clientId,
-        userId,
       },
     })
 
     if (!client) {
       return NextResponse.json(
-        { error: 'Client not found or access denied' },
+        { error: 'Client not found' },
         { status: 404 }
       )
     }
 
-    // Verify service exists and belongs to user
+    // Verify service exists (shared across company)
     const service = await prisma.service.findFirst({
       where: {
         id: serviceId,
-        userId,
       },
     })
 
     if (!service) {
       return NextResponse.json(
-        { error: 'Service not found or access denied' },
+        { error: 'Service not found' },
         { status: 404 }
       )
     }

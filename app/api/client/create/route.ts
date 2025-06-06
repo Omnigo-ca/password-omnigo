@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { getUserKey } from '@/lib/key-management'
 
 // Request body validation schema
 const createClientSchema = z.object({
@@ -35,16 +34,12 @@ export async function POST(request: NextRequest) {
 
     const { name, website, color } = validation.data
 
-    // Ensure user key exists (this will create it if it doesn't exist)
-    await getUserKey(userId)
-
-    // Create the client
+    // Create the client (no userId required, shared across company)
     const client = await prisma.client.create({
       data: {
         name,
         website: website || null,
         color: color || '#7DF9FF', // Default to brand electric blue
-        userId,
       },
       select: {
         id: true,

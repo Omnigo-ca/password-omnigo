@@ -36,11 +36,10 @@ export async function POST(request: NextRequest) {
 
     const { id, name, website, color } = validationResult.data
 
-    // Check if client exists and belongs to user
+    // Check if client exists (no user constraint)
     const existingClient = await prisma.client.findFirst({
       where: {
         id: id,
-        userId: userId,
       },
     })
 
@@ -55,7 +54,6 @@ export async function POST(request: NextRequest) {
     const duplicateClient = await prisma.client.findFirst({
       where: {
         name: name,
-        userId: userId,
         id: {
           not: id
         }

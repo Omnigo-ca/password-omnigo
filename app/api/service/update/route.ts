@@ -20,11 +20,10 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const validatedData = updateServiceSchema.parse(body)
 
-    // Check if the service exists and belongs to the user
+    // Check if the service exists (no user constraint)
     const existingService = await prisma.service.findFirst({
       where: {
-        id: validatedData.id,
-        userId: userId
+        id: validatedData.id
       }
     })
 
@@ -35,10 +34,9 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Check if another service with the same name already exists for this user
+    // Check if another service with the same name already exists (globally)
     const duplicateService = await prisma.service.findFirst({
       where: {
-        userId: userId,
         name: validatedData.name,
         id: { not: validatedData.id }
       }

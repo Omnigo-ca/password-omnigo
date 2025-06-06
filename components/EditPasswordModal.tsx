@@ -202,7 +202,7 @@ export function EditPasswordModal({ password, isOpen, onClose, onPasswordUpdated
       })
 
       onClose()
-      
+
       if (onPasswordUpdated) {
         onPasswordUpdated()
       }

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { getUserKey } from '@/lib/key-management'
 
 const createServiceSchema = z.object({
   name: z.string().min(1, 'Le nom du service est requis').max(100, 'Le nom ne peut pas dépasser 100 caractères'),
@@ -20,13 +19,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createServiceSchema.parse(body)
 
-    // Ensure user key exists (this will create it if it doesn't exist)
-    await getUserKey(userId)
-
-    // Check if service name already exists for this user
+    // Check if service name already exists (globally, not per user)
     const existingService = await prisma.service.findFirst({
       where: {
-        userId: userId,
         name: validatedData.name
       }
     })
@@ -38,13 +33,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create the service
+    // Create the service (no userId required)
     const service = await prisma.service.create({
       data: {
         name: validatedData.name,
         color: validatedData.color,
         isCustom: true, // User-created services are always custom
-        userId: userId
       }
     })
 

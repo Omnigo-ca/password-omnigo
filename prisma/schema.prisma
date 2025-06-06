@@ -21,12 +21,8 @@ model UserKey {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // Relation to passwords
+  // Relation to passwords only (clients and services are now shared)
   passwords       Password[]
-  // Relation to clients
-  clients         Client[]
-  // Relation to services
-  services        Service[]
 
   @@map("user_keys")
 }
@@ -36,13 +32,10 @@ model Client {
   name       String
   website    String?  // Optional website URL
   color      String   @default("#7DF9FF") // Pellet color (hex)
-  userId     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  // Relation to user key
-  userKey    UserKey  @relation(fields: [userId], references: [userId])
-  // Relation to passwords
+  // Relation to passwords (no user constraint)
   passwords  Password[]
 
   @@map("clients")
@@ -53,13 +46,10 @@ model Service {
   name       String
   color      String   @default("#4ECDC4") // Service color (hex)
   isCustom   Boolean  @default(false) // True for user-created services
-  userId     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  // Relation to user key
-  userKey    UserKey  @relation(fields: [userId], references: [userId])
-  // Relation to passwords
+  // Relation to passwords (no user constraint)
   passwords  Password[]
 
   @@map("services")
@@ -78,11 +68,11 @@ model Password {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  // Relation to user key
+  // Relation to user key (passwords are still user-specific for encryption)
   userKey    UserKey  @relation(fields: [userId], references: [userId])
-  // Relation to client
+  // Relation to client (now shared)
   client     Client?  @relation(fields: [clientId], references: [id])
-  // Relation to service
+  // Relation to service (now shared)
   service    Service? @relation(fields: [serviceId], references: [id])
 
   @@map("passwords")

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { getUserKey } from '@/lib/key-management'
 
 export async function GET() {
   try {
@@ -14,14 +13,8 @@ export async function GET() {
       )
     }
 
-    // Ensure user key exists (this will create it if it doesn't exist)
-    await getUserKey(userId)
-
-    // Fetch all clients for this user
+    // Fetch all clients
     const clients = await prisma.client.findMany({
-      where: {
-        userId: userId,
-      },
       select: {
         id: true,
         name: true,
