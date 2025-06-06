@@ -138,6 +138,7 @@ export function AddPasswordModal({ onPasswordAdded }: AddPasswordModalProps) {
           },
           body: JSON.stringify({
             name: data.customServiceName,
+            color: '#4ECDC4', // Default teal color for custom services
           }),
         })
 
