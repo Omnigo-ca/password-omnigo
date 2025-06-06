@@ -10,6 +10,17 @@ import { generateKey, encrypt, decrypt, exportKey, importKey } from './crypto';
 const keyCache = new Map<string, CryptoKey>();
 
 /**
+ * Default services to create for new users
+ */
+const DEFAULT_SERVICES = [
+  { name: 'Figma', color: '#45B7D1', isCustom: false },
+  { name: 'WHC', color: '#FF6B6B', isCustom: false },
+  { name: 'Google', color: '#4285F4', isCustom: false },
+  { name: 'GitHub', color: '#333333', isCustom: false },
+  { name: 'Microsoft', color: '#00A4EF', isCustom: false },
+];
+
+/**
  * Get the master key from environment variable
  */
 async function getMasterKey(): Promise<CryptoKey> {
@@ -21,6 +32,26 @@ async function getMasterKey(): Promise<CryptoKey> {
   // For simplicity, we'll use the base64 string directly as key material
   // In production, you might want to derive this from a more secure source
   return await importKey(masterKeyBase64);
+}
+
+/**
+ * Create default services for a new user
+ * @param userId - The user's ID from Clerk
+ */
+async function createDefaultServices(userId: string): Promise<void> {
+  try {
+    // Create default services for the user
+    await prisma.service.createMany({
+      data: DEFAULT_SERVICES.map(service => ({
+        ...service,
+        userId,
+      })),
+      skipDuplicates: true, // Skip if services already exist
+    });
+  } catch (error) {
+    console.error(`Failed to create default services for user ${userId}:`, error);
+    // Don't throw error here as it's not critical for user key creation
+  }
 }
 
 /**
@@ -57,6 +88,9 @@ export async function createUserKey(userId: string): Promise<CryptoKey> {
         iv,
       }
     });
+    
+    // Create default services for the new user
+    await createDefaultServices(userId);
     
     // Cache the key
     keyCache.set(userId, userKey);
